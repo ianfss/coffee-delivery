@@ -8,6 +8,7 @@ import {
 } from 'phosphor-react'
 import { Link } from 'react-router-dom'
 import { QuantityInput } from '../../components/quantity-input'
+import { useCart } from '../../hooks/useCart'
 import { PaymentMethod } from './components/payment-method'
 import { TextInput } from './components/text-input'
 import {
@@ -27,6 +28,9 @@ import {
 } from './styles'
 
 export function CheckoutPage() {
+  const { cart, totalPriceOfItems, changeCartItemQuantity, removeCartItem } =
+    useCart()
+
   return (
     <Container>
       <InfoContainer>
@@ -125,33 +129,49 @@ export function CheckoutPage() {
         <h2>Cafés selecionados</h2>
 
         <CartTotal>
-          <Coffee>
-            <div>
-              <img src="/images/coffees/americano.png" alt="" />
+          {cart.map((item) => {
+            return (
+              <Coffee key={item.id}>
+                <div>
+                  <img src={item.image} alt={item.title} />
 
-              <div>
-                <span>Expresso Americano</span>
+                  <div>
+                    <span>{item.title}</span>
 
-                <CoffeeInfo>
-                  <QuantityInput />
+                    <CoffeeInfo>
+                      <QuantityInput
+                        quantity={item.quantity}
+                        onIncrementItemQuantity={() => {
+                          changeCartItemQuantity(item.id, 'increment')
+                        }}
+                        onDecrementItemQuantity={() => {
+                          changeCartItemQuantity(item.id, 'decrement')
+                        }}
+                      />
 
-                  <button>
-                    <Trash />
-                    <span>Remover</span>
-                  </button>
-                </CoffeeInfo>
-              </div>
-            </div>
+                      <button
+                        onClick={() => {
+                          removeCartItem(item.id)
+                        }}
+                      >
+                        <Trash />
+                        <span>Remover</span>
+                      </button>
+                    </CoffeeInfo>
+                  </div>
+                </div>
 
-            <aside>R$ 9.90</aside>
-          </Coffee>
+                <aside>R$ {(item.price * item.quantity).toFixed(2)}</aside>
+              </Coffee>
+            )
+          })}
 
           <span />
 
           <CartTotalInfo>
             <div>
               <span>Total de itens</span>
-              <span>R$ 9.90</span>
+              <span>R$ {totalPriceOfItems.toFixed(2)}</span>
             </div>
 
             <div>
@@ -161,7 +181,7 @@ export function CheckoutPage() {
 
             <div>
               <span>Total</span>
-              <span>R$ 13.40</span>
+              <span>R$ {(totalPriceOfItems + 3.5).toFixed(2)}</span>
             </div>
           </CartTotalInfo>
 

@@ -96,6 +96,9 @@ export const PaymentOptions = styled.div`
 export const Coffee = styled.div`
   display: flex;
   justify-content: space-between;
+  padding: 24px 0;
+
+  border-bottom: 1px solid ${(props) => props.theme.colors.baseButton};
 
   > div {
     > img {
@@ -155,19 +158,14 @@ export const CartTotal = styled.div`
   background-color: ${(props) => props.theme.colors.baseCard};
   width: 100%;
   min-width: 448px;
-
-  > span {
-    display: block;
-    height: 1px;
-    background-color: ${(props) => props.theme.colors.baseButton};
-    margin: 24px 0;
-  }
 `
 
 export const CartTotalInfo = styled.div`
   display: flex;
   flex-direction: column;
   gap: 12px;
+
+  padding: 24px 0;
 
   div {
     display: flex;
