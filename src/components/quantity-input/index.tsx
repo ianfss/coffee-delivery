@@ -12,14 +12,9 @@ export function QuantityInput({
   onDecrementItemQuantity,
   quantity,
 }: QuantityInputProps) {
-  const isDecrementButtonDisabled = quantity <= 1
-
   return (
     <Container>
-      <button
-        disabled={isDecrementButtonDisabled}
-        onClick={onDecrementItemQuantity}
-      >
+      <button onClick={onDecrementItemQuantity}>
         <MinusCircle weight="fill" size={20} />
       </button>
       <span>{quantity}</span>

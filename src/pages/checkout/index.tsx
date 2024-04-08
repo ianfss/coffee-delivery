@@ -27,9 +27,19 @@ import {
   PaymentOptions,
 } from './styles'
 
+const shippingPrice = 3.5
+
 export function CheckoutPage() {
-  const { cart, totalPriceOfItems, changeCartItemQuantity, removeCartItem } =
-    useCart()
+  const {
+    cart,
+    decrementItemQuantity,
+    incrementItemQuantity,
+    removeItemFromCart,
+  } = useCart()
+
+  const totalItemsPrice = cart.reduce((previousValue, currentItem) => {
+    return (previousValue += currentItem.price * currentItem.quantity)
+  }, 0)
 
   return (
     <Container>
@@ -141,17 +151,17 @@ export function CheckoutPage() {
                     <CoffeeInfo>
                       <QuantityInput
                         quantity={item.quantity}
-                        onIncrementItemQuantity={() => {
-                          changeCartItemQuantity(item.id, 'increment')
-                        }}
                         onDecrementItemQuantity={() => {
-                          changeCartItemQuantity(item.id, 'decrement')
+                          decrementItemQuantity(item.id)
+                        }}
+                        onIncrementItemQuantity={() => {
+                          incrementItemQuantity(item.id)
                         }}
                       />
 
                       <button
                         onClick={() => {
-                          removeCartItem(item.id)
+                          removeItemFromCart(item.id)
                         }}
                       >
                         <Trash />
@@ -161,7 +171,7 @@ export function CheckoutPage() {
                   </div>
                 </div>
 
-                <aside>R$ {(item.price * item.quantity).toFixed(2)}</aside>
+                <aside>R$ {item.price.toFixed(2)}</aside>
               </Coffee>
             )
           })}
@@ -171,17 +181,32 @@ export function CheckoutPage() {
           <CartTotalInfo>
             <div>
               <span>Total de itens</span>
-              <span>R$ {totalPriceOfItems.toFixed(2)}</span>
+              <span>
+                {new Intl.NumberFormat('pt-br', {
+                  currency: 'BRL',
+                  style: 'currency',
+                }).format(totalItemsPrice)}
+              </span>
             </div>
 
             <div>
               <span>Entrega</span>
-              <span>R$ 3.50</span>
+              <span>
+                {new Intl.NumberFormat('pt-br', {
+                  currency: 'BRL',
+                  style: 'currency',
+                }).format(shippingPrice)}
+              </span>
             </div>
 
             <div>
               <span>Total</span>
-              <span>R$ {(totalPriceOfItems + 3.5).toFixed(2)}</span>
+              <span>
+                {new Intl.NumberFormat('pt-br', {
+                  currency: 'BRL',
+                  style: 'currency',
+                }).format(totalItemsPrice + shippingPrice)}
+              </span>
             </div>
           </CartTotalInfo>
 

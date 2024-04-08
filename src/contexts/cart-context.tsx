@@ -1,6 +1,12 @@
-import { produce } from 'immer'
-import { ReactNode, createContext, useState } from 'react'
+import { ReactNode, createContext, useEffect, useReducer } from 'react'
 import { Coffee } from '../pages/home/components/card'
+import {
+  addItemToCartAction,
+  decrementItemQuantityAction,
+  incrementItemQuantityAction,
+  removeItemFromCartAction,
+} from '../reducers/cart/actions'
+import { cartReducer } from '../reducers/cart/reducer'
 
 interface Item extends Coffee {
   quantity: number
@@ -8,14 +14,10 @@ interface Item extends Coffee {
 
 interface CartContextType {
   cart: Item[]
-  numberOfItemsOnCart: number
-  totalPriceOfItems: number
   addItemToCart: (item: Item) => void
-  changeCartItemQuantity: (
-    itemId: string,
-    type: 'increment' | 'decrement',
-  ) => void
-  removeCartItem: (itemId: string) => void
+  removeItemFromCart: (itemId: Item['id']) => void
+  decrementItemQuantity: (itemId: Item['id']) => void
+  incrementItemQuantity: (itemId: Item['id']) => void
 }
 
 export const CartContext = createContext({} as CartContextType)
@@ -25,74 +27,57 @@ interface CartContextProviderProps {
 }
 
 export function CartContextProvider({ children }: CartContextProviderProps) {
-  const [cart, setCart] = useState<Item[]>([])
+  // const [cart, setCart] = useState<Item[]>([])
+  const [cartState, dispatch] = useReducer(
+    cartReducer,
+    { cart: [] },
+    (state) => {
+      const storedStateAsJSON = localStorage.getItem(
+        '@coffee-delivery:cart-state-1.0.0',
+      )
 
-  const numberOfItemsOnCart = cart.length
+      if (storedStateAsJSON) {
+        return JSON.parse(storedStateAsJSON)
+      }
 
-  const totalPriceOfItems = cart.reduce(
-    (acc, current) => acc + current.price * current.quantity,
-    0,
+      return state
+    },
   )
 
+  const { cart } = cartState
+
   function addItemToCart(item: Item) {
-    const itemAlreadyExists = cart.findIndex(
-      (cartItem) => cartItem.id === item.id,
-    )
-
-    const newCart = produce(cart, (draft) => {
-      if (itemAlreadyExists < 0) {
-        draft.push(item)
-      } else {
-        draft[itemAlreadyExists].quantity += item.quantity
-      }
-    })
-
-    setCart(newCart)
+    dispatch(addItemToCartAction(item))
   }
 
-  function changeCartItemQuantity(
-    itemId: string,
-    type: 'increment' | 'decrement',
-  ) {
-    const newCart = produce(cart, (draft) => {
-      const itemAlreadyExists = cart.findIndex(
-        (cartItem) => cartItem.id === itemId,
-      )
-
-      if (itemAlreadyExists >= 0) {
-        const item = draft[itemAlreadyExists]
-
-        draft[itemAlreadyExists].quantity =
-          type === 'increment' ? item.quantity + 1 : item.quantity - 1
-      }
-    })
-
-    setCart(newCart)
+  function removeItemFromCart(itemId: Item['id']) {
+    dispatch(removeItemFromCartAction(itemId))
   }
 
-  function removeCartItem(itemId: string) {
-    const newCart = produce(cart, (draft) => {
-      const itemAlreadyExists = cart.findIndex(
-        (cartItem) => cartItem.id === itemId,
-      )
-
-      if (itemAlreadyExists >= 0) {
-        draft.splice(itemAlreadyExists, 1)
-      }
-    })
-
-    setCart(newCart)
+  function incrementItemQuantity(itemId: Item['id']) {
+    dispatch(incrementItemQuantityAction(itemId))
   }
+
+  function decrementItemQuantity(itemId: Item['id']) {
+    dispatch(decrementItemQuantityAction(itemId))
+  }
+
+  useEffect(() => {
+    if (cartState) {
+      const stateJSON = JSON.stringify(cartState)
+
+      localStorage.setItem('@coffee-delivery:cart-state-1.0.0', stateJSON)
+    }
+  }, [cartState])
 
   return (
     <CartContext.Provider
       value={{
         cart,
-        numberOfItemsOnCart,
-        totalPriceOfItems,
         addItemToCart,
-        changeCartItemQuantity,
-        removeCartItem,
+        removeItemFromCart,
+        decrementItemQuantity,
+        incrementItemQuantity,
       }}
     >
       {children}

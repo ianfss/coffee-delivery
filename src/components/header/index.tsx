@@ -10,7 +10,7 @@ import {
 } from './styles'
 
 export function Header() {
-  const { numberOfItemsOnCart } = useCart()
+  const { cart } = useCart()
   return (
     <Container>
       <Content className="container">
@@ -25,7 +25,7 @@ export function Header() {
           <Link to="/checkout">
             <ButtonSecondary>
               <ShoppingCart size={20} weight="fill" />
-              {numberOfItemsOnCart > 0 && <span>{numberOfItemsOnCart}</span>}
+              {cart.length > 0 ? <span>{cart.length}</span> : null}
             </ButtonSecondary>
           </Link>
         </Aside>
