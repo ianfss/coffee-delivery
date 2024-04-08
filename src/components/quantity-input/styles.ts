@@ -12,19 +12,23 @@ export const Container = styled.div`
     background-color: transparent;
     display: flex;
     align-items: center;
-  }
 
-  button svg {
-    color: ${(props) => props.theme.colors.primary};
+    &:disabled {
+      cursor: not-allowed;
 
-    transition: all 0.2s;
+      color: ${(props) => props.theme.colors.baseLabel};
+    }
 
-    &:hover {
-      color: ${(props) => props.theme.colors.primaryDark};
+    &:not(:disabled) {
+      color: ${(props) => props.theme.colors.primary};
+
+      & :hover {
+        color: ${(props) => props.theme.colors.primaryDark};
+      }
     }
   }
 
-  span {
+  button span {
     padding-top: 2px;
     color: ${(props) => props.theme.colors.baseTitle};
   }

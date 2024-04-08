@@ -1,5 +1,6 @@
 import { MapPin, ShoppingCart } from 'phosphor-react'
 import { Link } from 'react-router-dom'
+import { useCart } from '../../hooks/useCart'
 import {
   Aside,
   ButtonPrimary,
@@ -9,6 +10,7 @@ import {
 } from './styles'
 
 export function Header() {
+  const { numberOfItemsOnCart } = useCart()
   return (
     <Container>
       <Content className="container">
@@ -23,7 +25,7 @@ export function Header() {
           <Link to="/checkout">
             <ButtonSecondary>
               <ShoppingCart size={20} weight="fill" />
-              <span>1</span>
+              {numberOfItemsOnCart > 0 && <span>{numberOfItemsOnCart}</span>}
             </ButtonSecondary>
           </Link>
         </Aside>
