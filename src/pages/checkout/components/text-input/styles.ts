@@ -13,7 +13,6 @@ export const Container = styled.label`
   justify-content: space-between;
   border-radius: 6px;
   border: 1px solid ${(props) => props.theme.colors.baseButton};
-  border-radius: 6px;
 
   background-color: ${(props) => props.theme.colors.baseInput};
 

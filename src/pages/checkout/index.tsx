@@ -12,6 +12,7 @@ import { useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 import { QuantityInput } from '../../components/quantity-input'
 import { useCart } from '../../hooks/useCart'
+import { EmptyState } from './components/empty-state'
 import { PaymentMethod } from './components/payment-method'
 import { TextInput } from './components/text-input'
 import {
@@ -80,8 +81,6 @@ export function CheckoutPage() {
     if (cart.length === 0) {
       return alert('É preciso ter pelo menos um item no carrinho')
     }
-
-    // console.log({ ...data, checkout: cart })
 
     checkoutCart({ ...data, checkout: cart })
 
@@ -166,7 +165,7 @@ export function CheckoutPage() {
 
                 <p>
                   O pagamento é feito na entrega. Escolha a forma que deseja
-                  pagar
+                  pagar:
                 </p>
               </div>
             </PaymentHeading>
@@ -209,6 +208,7 @@ export function CheckoutPage() {
         <h2>Cafés selecionados</h2>
 
         <CartTotal>
+          {cart.length === 0 && <EmptyState />}
           {cart.map((item) => {
             return (
               <Coffee key={item.id}>
