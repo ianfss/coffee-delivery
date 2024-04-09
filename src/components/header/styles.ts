@@ -5,6 +5,10 @@ export const Container = styled.header`
   width: 100%;
   padding: 2rem 0;
 
+  position: sticky;
+  top: 0;
+  z-index: 10;
+
   background: ${(props) => props.theme.colors.background};
 `
 
