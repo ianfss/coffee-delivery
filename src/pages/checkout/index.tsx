@@ -1,3 +1,4 @@
+import { zodResolver } from '@hookform/resolvers/zod'
 import {
   Bank,
   CreditCard,
@@ -6,7 +7,9 @@ import {
   Money,
   Trash,
 } from 'phosphor-react'
-import { Link } from 'react-router-dom'
+import { useForm } from 'react-hook-form'
+import { useNavigate } from 'react-router-dom'
+import { z } from 'zod'
 import { QuantityInput } from '../../components/quantity-input'
 import { useCart } from '../../hooks/useCart'
 import { PaymentMethod } from './components/payment-method'
@@ -27,15 +30,63 @@ import {
   PaymentOptions,
 } from './styles'
 
+const newCheckoutFormValidationSchema = z.object({
+  cep: z.string().min(1),
+  street: z.string().min(1),
+  number: z.string().min(1),
+  fullAddress: z.string().optional(),
+  neighborhood: z.string().min(1),
+  city: z.string().min(1),
+  state: z.string().min(1).max(2),
+  paymentMethod: z.enum(['credit', 'debit', 'cash']),
+})
+
+export type NewCheckoutFormData = z.infer<
+  typeof newCheckoutFormValidationSchema
+>
+
 const shippingPrice = 3.5
 
 export function CheckoutPage() {
+  const newCheckoutForm = useForm<NewCheckoutFormData>({
+    resolver: zodResolver(newCheckoutFormValidationSchema),
+    defaultValues: {
+      cep: '',
+      street: '',
+      number: '',
+      fullAddress: '',
+      neighborhood: '',
+      city: '',
+      state: '',
+      paymentMethod: 'credit',
+    },
+  })
+
+  const { handleSubmit, register, watch } = newCheckoutForm
+
+  const selectedPaymentMethod = watch('paymentMethod')
+
   const {
     cart,
     decrementItemQuantity,
     incrementItemQuantity,
     removeItemFromCart,
+    checkoutCart,
   } = useCart()
+
+  const navigate = useNavigate()
+
+  function handleCreateNewCheckout(data: NewCheckoutFormData) {
+    if (cart.length === 0) {
+      return alert('É preciso ter pelo menos um item no carrinho')
+    }
+
+    // console.log({ ...data, checkout: cart })
+
+    checkoutCart({ ...data, checkout: cart })
+
+    navigate('/success')
+  }
 
   const totalItemsPrice = cart.reduce((previousValue, currentItem) => {
     return (previousValue += currentItem.price * currentItem.quantity)
@@ -46,7 +97,7 @@ export function CheckoutPage() {
       <InfoContainer>
         <h2>Complete seu pedido</h2>
 
-        <form id="order">
+        <form id="order" onSubmit={handleSubmit(handleCreateNewCheckout)}>
           <AddressContainer>
             <AddressHeading>
               <MapPin size={22} />
@@ -63,38 +114,45 @@ export function CheckoutPage() {
                 placeholder="CEP"
                 type="number"
                 containerProps={{ style: { gridArea: 'cep' } }}
+                {...register('cep')}
               />
 
               <TextInput
                 placeholder="Rua"
                 containerProps={{ style: { gridArea: 'street' } }}
+                {...register('street')}
               />
 
               <TextInput
                 placeholder="Número"
                 containerProps={{ style: { gridArea: 'number' } }}
+                {...register('number')}
               />
 
               <TextInput
                 placeholder="Complemento"
                 optional
                 containerProps={{ style: { gridArea: 'fullAddress' } }}
+                {...register('fullAddress')}
               />
 
               <TextInput
                 placeholder="Bairro"
                 containerProps={{ style: { gridArea: 'neighborhood' } }}
+                {...register('neighborhood')}
               />
 
               <TextInput
                 placeholder="Cidade"
                 containerProps={{ style: { gridArea: 'city' } }}
+                {...register('city')}
               />
 
               <TextInput
                 placeholder="UF"
                 maxLength={2}
                 containerProps={{ style: { gridArea: 'state' } }}
+                {...register('state')}
               />
             </AddressForm>
           </AddressContainer>
@@ -115,17 +173,29 @@ export function CheckoutPage() {
 
             <PaymentOptions>
               <div>
-                <PaymentMethod isSelected={true} value="credit">
+                <PaymentMethod
+                  isSelected={selectedPaymentMethod === 'credit'}
+                  {...register('paymentMethod')}
+                  value="credit"
+                >
                   <CreditCard size={16} />
                   <span>Cartão de crédito</span>
                 </PaymentMethod>
 
-                <PaymentMethod isSelected={false} value="debit">
+                <PaymentMethod
+                  isSelected={selectedPaymentMethod === 'debit'}
+                  {...register('paymentMethod')}
+                  value="debit"
+                >
                   <Bank size={16} />
                   <span>Cartão de débito</span>
                 </PaymentMethod>
 
-                <PaymentMethod isSelected={false} value="cash">
+                <PaymentMethod
+                  isSelected={selectedPaymentMethod === 'cash'}
+                  {...register('paymentMethod')}
+                  value="cash"
+                >
                   <Money size={16} />
                   <span>Dinheiro</span>
                 </PaymentMethod>
@@ -210,11 +280,9 @@ export function CheckoutPage() {
             </div>
           </CartTotalInfo>
 
-          <Link to="/success">
-            <CheckoutButton type="submit" form="order">
-              Confirmar pedido
-            </CheckoutButton>
-          </Link>
+          <CheckoutButton type="submit" form="order">
+            Confirmar pedido
+          </CheckoutButton>
         </CartTotal>
       </InfoContainer>
     </Container>

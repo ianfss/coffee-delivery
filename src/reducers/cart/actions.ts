@@ -1,10 +1,11 @@
-import { Item } from './reducer'
+import { Checkout, Item } from './reducer'
 
 export enum ActionTypes {
   ADD_ITEM_TO_CART = 'ADD_ITEM_TO_CART',
   REMOVE_ITEM_FROM_CART = 'REMOVE_ITEM_FROM_CART',
   INCREMENT_ITEM_QUANTITY = 'INCREMENT_ITEM_QUANTITY',
   DECREMENT_ITEM_QUANTITY = 'DECREMENT_ITEM_QUANTITY',
+  CHECKOUT_CART = 'CHECKOUT_CART',
 }
 
 export type Actions =
@@ -21,6 +22,12 @@ export type Actions =
         | ActionTypes.REMOVE_ITEM_FROM_CART
       payload: {
         itemId: Item['id']
+      }
+    }
+  | {
+      type: ActionTypes.CHECKOUT_CART
+      payload: {
+        checkout: Checkout
       }
     }
 
@@ -56,6 +63,15 @@ export function decrementItemQuantityAction(itemId: Item['id']) {
     type: ActionTypes.DECREMENT_ITEM_QUANTITY,
     payload: {
       itemId,
+    },
+  } satisfies Actions
+}
+
+export function checkoutAction(checkout: Checkout) {
+  return {
+    type: ActionTypes.CHECKOUT_CART,
+    payload: {
+      checkout,
     },
   } satisfies Actions
 }

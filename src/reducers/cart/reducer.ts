@@ -1,4 +1,5 @@
 import { produce } from 'immer'
+import { NewCheckoutFormData } from '../../pages/checkout'
 import { Coffee } from '../../pages/home/components/card'
 import { ActionTypes, Actions } from './actions'
 
@@ -6,8 +7,13 @@ export interface Item extends Coffee {
   quantity: number
 }
 
+export interface Checkout extends NewCheckoutFormData {
+  checkout: Item[]
+}
+
 interface CartState {
   cart: Item[]
+  checkout: Checkout
 }
 
 export function cartReducer(state: CartState, action: Actions) {
@@ -54,5 +60,15 @@ export function cartReducer(state: CartState, action: Actions) {
           itemToDecrement.quantity -= 1
         }
       })
+
+    case ActionTypes.CHECKOUT_CART:
+      return produce(state, (draft) => {
+        const newCheckout = action.payload.checkout
+        draft.checkout = newCheckout
+        draft.cart = []
+      })
+
+    default:
+      return state
   }
 }

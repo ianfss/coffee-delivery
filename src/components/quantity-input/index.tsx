@@ -14,7 +14,7 @@ export function QuantityInput({
 }: QuantityInputProps) {
   return (
     <Container>
-      <button onClick={onDecrementItemQuantity}>
+      <button onClick={onDecrementItemQuantity} disabled={quantity <= 1}>
         <MinusCircle weight="fill" size={20} />
       </button>
       <span>{quantity}</span>

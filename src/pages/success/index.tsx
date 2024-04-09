@@ -1,10 +1,16 @@
 import { CurrencyDollar, MapPin, Timer } from 'phosphor-react'
 import { useTheme } from 'styled-components'
+import { useCart } from '../../hooks/useCart'
 import { Container, Heading, Info, InfoContent, Order } from './styles'
 
 export function SuccessPage() {
   const theme = useTheme()
-
+  const paymentMethod = {
+    credit: 'Cartão de crédito',
+    debit: 'Cartão de débito',
+    cash: 'Dinheiro',
+  }
+  const { checkout } = useCart()
   return (
     <Container>
       <Order>
@@ -24,10 +30,15 @@ export function SuccessPage() {
 
               <div>
                 <span>
-                  Entrega em <strong>Rua João Daniel Martinelli, 102</strong>
+                  Entrega em{' '}
+                  <strong>
+                    {checkout.street}, {checkout.number}
+                  </strong>
                 </span>
 
-                <span>Farrapos - Porto Alegre, RS</span>
+                <span>
+                  {checkout.neighborhood} - {checkout.city}, {checkout.state}
+                </span>
               </div>
             </div>
 
@@ -55,7 +66,7 @@ export function SuccessPage() {
               <div>
                 <span>Pagamento na entrega</span>
 
-                <strong>Cartão de Crédito</strong>
+                <strong>{paymentMethod[checkout.paymentMethod]}</strong>
               </div>
             </div>
           </InfoContent>
