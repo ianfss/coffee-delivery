@@ -27,19 +27,22 @@ import {
   Container,
   InfoContainer,
   PaymentContainer,
+  PaymentErrorMessage,
   PaymentHeading,
   PaymentOptions,
 } from './styles'
 
 const newCheckoutFormValidationSchema = z.object({
-  cep: z.string().min(1),
-  street: z.string().min(1),
-  number: z.string().min(1),
-  fullAddress: z.string().optional(),
-  neighborhood: z.string().min(1),
-  city: z.string().min(1),
-  state: z.string().min(1).max(2),
-  paymentMethod: z.enum(['credit', 'debit', 'cash']),
+  cep: z.number({ invalid_type_error: 'Informe o CEP' }),
+  street: z.string().min(1, 'Informe a rua'),
+  number: z.string().min(1, 'Informe o número'),
+  fullAddress: z.string(),
+  neighborhood: z.string().min(1, 'Informe o bairro'),
+  city: z.string().min(1, 'Informe a cidade'),
+  state: z.string().min(1, 'Informe a UF'),
+  paymentMethod: z.enum(['credit', 'debit', 'cash'], {
+    invalid_type_error: 'Informe um método de pagamento',
+  }),
 })
 
 export type NewCheckoutFormData = z.infer<
@@ -51,19 +54,14 @@ const shippingPrice = 3.5
 export function CheckoutPage() {
   const newCheckoutForm = useForm<NewCheckoutFormData>({
     resolver: zodResolver(newCheckoutFormValidationSchema),
-    defaultValues: {
-      cep: '',
-      street: '',
-      number: '',
-      fullAddress: '',
-      neighborhood: '',
-      city: '',
-      state: '',
-      paymentMethod: 'credit',
-    },
   })
 
-  const { handleSubmit, register, watch } = newCheckoutForm
+  const {
+    handleSubmit,
+    register,
+    watch,
+    formState: { errors },
+  } = newCheckoutForm
 
   const selectedPaymentMethod = watch('paymentMethod')
 
@@ -78,6 +76,7 @@ export function CheckoutPage() {
   const navigate = useNavigate()
 
   function handleCreateNewCheckout(data: NewCheckoutFormData) {
+    console.log(data.cep)
     if (cart.length === 0) {
       return alert('É preciso ter pelo menos um item no carrinho')
     }
@@ -113,19 +112,22 @@ export function CheckoutPage() {
                 placeholder="CEP"
                 type="number"
                 containerProps={{ style: { gridArea: 'cep' } }}
-                {...register('cep')}
+                {...register('cep', { valueAsNumber: true })}
+                error={errors.cep}
               />
 
               <TextInput
                 placeholder="Rua"
                 containerProps={{ style: { gridArea: 'street' } }}
                 {...register('street')}
+                error={errors.street}
               />
 
               <TextInput
                 placeholder="Número"
                 containerProps={{ style: { gridArea: 'number' } }}
                 {...register('number')}
+                error={errors.number}
               />
 
               <TextInput
@@ -133,18 +135,21 @@ export function CheckoutPage() {
                 optional
                 containerProps={{ style: { gridArea: 'fullAddress' } }}
                 {...register('fullAddress')}
+                error={errors.fullAddress}
               />
 
               <TextInput
                 placeholder="Bairro"
                 containerProps={{ style: { gridArea: 'neighborhood' } }}
                 {...register('neighborhood')}
+                error={errors.neighborhood}
               />
 
               <TextInput
                 placeholder="Cidade"
                 containerProps={{ style: { gridArea: 'city' } }}
                 {...register('city')}
+                error={errors.city}
               />
 
               <TextInput
@@ -152,6 +157,7 @@ export function CheckoutPage() {
                 maxLength={2}
                 containerProps={{ style: { gridArea: 'state' } }}
                 {...register('state')}
+                error={errors.state}
               />
             </AddressForm>
           </AddressContainer>
@@ -199,6 +205,12 @@ export function CheckoutPage() {
                   <span>Dinheiro</span>
                 </PaymentMethod>
               </div>
+
+              {errors.paymentMethod ? (
+                <PaymentErrorMessage role="alert">
+                  {errors.paymentMethod.message}
+                </PaymentErrorMessage>
+              ) : null}
             </PaymentOptions>
           </PaymentContainer>
         </form>
